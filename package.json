@@ -1,8 +1,8 @@
 {
-  "name": "tasks-cli",
+  "name": "taskmaker",
   "version": "1.0.0",
   "bin": {
-    "task": "./task.js"
+    "taskmaker": "./taskmaker.js"
   },
   "type": "module",
   "description": "Create/Edit/Modify tasks using command line interface",
@@ -16,14 +16,15 @@
   },
   "keywords": [
     "tasks",
-    "cli"
+    "cli",
+    "taskmaker"
   ],
   "author": "Tanuj Sengupta",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Yuva0/tasks-cli/issues"
+    "url": "https://github.com/Yuva0/taskmaker/issues"
   },
-  "homepage": "https://github.com/Yuva0/tasks-cli#readme",
+  "homepage": "https://github.com/Yuva0/taskmaker/#readme",
   "dependencies": {
     "inquirer": "^12.3.0"
   }
