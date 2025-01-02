@@ -15,9 +15,9 @@
 <ul>
     <li>
         <p>Clone this repository</p>
-        <code style={{width:"100%"}}>
+        ```
             git clone https://github.com/yourusername/todo-cli.git
             cd todo-cli
-        </code>
+        ```
     </li>
 </ul>
