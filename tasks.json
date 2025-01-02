@@ -3,7 +3,7 @@
     "id": 0,
     "title": "Task1",
     "description": "Desc1",
-    "isCompleted": true
+    "isCompleted": false
   },
   {
     "id": 1,
@@ -15,12 +15,6 @@
     "id": 2,
     "title": "Task3",
     "description": "Desc3",
-    "isCompleted": false
-  },
-  {
-    "id": 3,
-    "title": "Task4",
-    "description": "Desc4",
     "isCompleted": false
   }
 ]

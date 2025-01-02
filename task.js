@@ -2,15 +2,6 @@ import { input, select, confirm } from "@inquirer/prompts";
 import fs from "fs"
 import path from "path"
 
-/*
-Props
-{
-    id: int;
-    title: string;
-    description?: string;
-    isCompleted?: boolean
-}
-*/
 let tasks = [];
 
 // Handler functions
@@ -57,11 +48,10 @@ const findTask = (taskId) => {
     else {
         console.error("Task not found");
     }
-
 }
 
-
-const createTask = async () => {
+// Create Interactive Task
+const createTaskInteractive = async () => {
     let title = "";
     while (!title || title.length === 0) {
         title = await input({
@@ -82,6 +72,12 @@ const createTask = async () => {
 
     tasks.push({ id: tasks.length, title, description, isCompleted });
     return saveTasks();
+};
+
+// Create Task
+const createTask = (title, description, isCompleted) => {
+    tasks.push({ id: tasks.length, title, description, isCompleted });
+    return saveTasks()
 };
 
 const deleteTask = async () => {
@@ -109,6 +105,24 @@ const saveTasks = () => {
     });
 };
 
+const searchTasks = (searchArgument) => {
+    return new Promise((resolve) => {
+        const searchedTasks = tasks.filter((task) => {
+            if(task.title.includes(searchArgument) || task.description.includes(searchArgument)){
+                return true;
+            }
+            return false;
+        })
+
+        if (Array.isArray(searchedTasks))
+            searchedTasks.forEach((task) => console.log(`Title: ${task.title} \nDescription: ${task.description} \nStatus: ${task.isCompleted ? "Completed" : "Not Completed"} \n\n`));
+        else
+            console.log(`Title: ${searchedTasks.title} \nDescription: ${searchedTasks.description} \nStatus: ${searchedTasks.isCompleted ? "Completed" : "Not Completed"} \n\n`);
+
+        resolve();
+    });
+}
+
 
 const markCompleted = async () => {
     const completedID = await input({
@@ -126,8 +140,8 @@ const markCompleted = async () => {
 };
 
 
-const interactiveMainMenu = async () => {
-    loadTasks().then(() => {
+const interactiveMainMenu = () => {
+    loadTasks().then(async() => {
         return select({
             message: "Choose what you want to do:",
             choices: [
@@ -140,14 +154,12 @@ const interactiveMainMenu = async () => {
         }).then((option) => {
             switch (option) {
                 case "create":
-                    return createTask().then(() => interactiveMainMenu());
+                    return createTaskInteractive().then(() => interactiveMainMenu());
 
                 case "list":
                     return listTasks().then(() => interactiveMainMenu());
 
                 case "delete":
-
-                
                     return deleteTask().then(() => interactiveMainMenu());
 
                 case "mark":
@@ -166,43 +178,66 @@ const interactiveMainMenu = async () => {
 const main = () => {
     const checkForInteractiveMenuKeyword = process.argv.slice(-2);
 
+    // Interactive Menu Enablement option
     if (checkForInteractiveMenuKeyword.includes("--interactive") || checkForInteractiveMenuKeyword.includes("-i")) {
         interactiveMainMenu();
         return;
     }
 
-    // Check for task index
-    if(process.argv.indexOf("-t") !== -1 || process.argv.indexOf("--task") !== -1){
-        const taskParamIndex = process.argv.indexOf("-t") !== -1 ? process.argv.indexOf("-t") : process.argv.indexOf("--task");
-        const taskArgIndex = taskArgumentIndex !== -1 ? taskArgumentIndex + 1: -1;
-        const taskArgument = process.argv[taskIndex];
+    loadTasks().then(() => {
+         // Create a task
+        if (process.argv.indexOf("-c") !== -1 || process.argv.indexOf("--create") !== -1){
+            const createTaskIndex = process.argv.indexOf("-c") !== -1 ? process.argv.indexOf("-c") : process.argv.indexOf("--create");
 
-        // Check for other params
+            if(createTaskIndex !== -1){
+                const titleIndex = createTaskIndex + 1;
+                const descriptionIndex = createTaskIndex + 2;
+                const markCompletedIndex = createTaskIndex + 3;
 
+                const markCompleted = process.argv[markCompletedIndex] === "y" ? true : false;
 
+                if(titleIndex && descriptionIndex){
+                    createTask(process.argv[titleIndex], process.argv[descriptionIndex], markCompleted);
+                }
+                else {
+                    console.error("Please enter valid title & description");
+                }
+            }
+        }
 
-    }
+        // Find using task index
+        if(process.argv.indexOf("-f") !== -1 || process.argv.indexOf("--find") !== -1){
+            const findParamIndex = process.argv.indexOf("-f") !== -1 ? process.argv.indexOf("-f") : process.argv.indexOf("--find");
+            const findArgIndex = findParamIndex !== -1 ? findParamIndex + 1: -1;
+            const findArgument = process.argv[findArgIndex];
 
+            if(findArgIndex != -1 && findArgument == undefined){
+                console.error("Specify the task index to be checked")
+            }
 
+            if (findArgument) {
+                findTask(findArgument - 1)
+            }
+        }
 
+        // Search for a task
+        if(process.argv.indexOf("-s") !== -1 || process.argv.indexOf("--search") !== -1){
+            const searchParamIndex = process.argv.indexOf("-s") !== -1 ? process.argv.indexOf("-s") : process.argv.indexOf("--search");
+            const searchArgIndex = searchParamIndex !== -1 ? searchParamIndex + 1: -1;
+            const searchArgument = process.argv[searchArgIndex];
 
+            // Check for other params
+            if(searchArgIndex != -1 && searchArgument == undefined){
+                console.error("Specify the keyword to be searched for");
+            }
 
+            if (searchArgument) {
+                searchTasks(searchArgument);
+            }
+        }
+    })
 
-    const taskArgumentIndex = process.argv.indexOf("-t") !== -1 ? process.argv.indexOf("-t") : process.argv.indexOf("--task");
-    const taskIndex = taskArgumentIndex !== -1 ? taskArgumentIndex + 1 : -1;
-    const taskArgument = process.argv[taskIndex];
-
-    if(taskIndex != -1 && taskArgument == undefined){
-        console.error("Specify the task index to be checked")
-    }
-
-    if (taskArgument) {
-        loadTasks().then(() => {
-            findTask(taskArgument - 1)
-        }).catch((err) => {
-            console.error(err.message);
-        });
-    }
+   
 
 }
 
