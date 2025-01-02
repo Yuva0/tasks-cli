@@ -1,6 +1,9 @@
 {
   "name": "tasks-cli",
   "version": "1.0.0",
+  "bin": {
+    "task": "./task.js"
+  },
   "type": "module",
   "description": "Create/Edit/Modify tasks using command line interface",
   "main": "/bin/index.js",

@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { input, select, confirm } from "@inquirer/prompts";
 import fs from "fs"
 import path from "path"
@@ -131,6 +133,11 @@ const searchTasks = (searchArgument) => {
             }
             return false;
         })
+        
+        if(!searchedTasks || searchedTasks.length === 0){
+            console.log("No Tasks found");
+            return
+        }
 
         if (Array.isArray(searchedTasks))
             searchedTasks.forEach((task) => console.log(`Title: ${task.title} \nDescription: ${task.description} \nStatus: ${task.isCompleted ? "Completed" : "Not Completed"} \n\n`));
@@ -239,7 +246,6 @@ const main = () => {
 
         // List all task
         if (process.argv.indexOf("-l") !== -1 || process.argv.indexOf("--list") !== -1){
-            console.log("Listed")
             listTasks();
         }
 
