@@ -1,0 +1,27 @@
+{
+  "name": "tasks-cli",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Create/Edit/Modify tasks using command line interface",
+  "main": "/bin/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yuva0/tasks-cli.git"
+  },
+  "keywords": [
+    "tasks",
+    "cli"
+  ],
+  "author": "Tanuj Sengupta",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Yuva0/tasks-cli/issues"
+  },
+  "homepage": "https://github.com/Yuva0/tasks-cli#readme",
+  "dependencies": {
+    "inquirer": "^12.3.0"
+  }
+}
