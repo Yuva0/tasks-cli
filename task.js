@@ -30,8 +30,12 @@ const loadTasks = () => {
     })
 };
 
+// List Tasks
 const listTasks = () => {
     return new Promise((resolve) => {
+        if(!tasks || tasks.length == 0)
+            console.error("No tasks found");
+
         tasks.forEach((task, index) => {
             console.log(`\nTask ${index+1} \n\tTitle: ${task.title} \n\tDescription: ${task.description} \n\tStatus: ${task.isCompleted ? "Completed" : "Not Completed"} \n`);
         });
@@ -39,9 +43,9 @@ const listTasks = () => {
     })
 };
 
+// Find Task
 const findTask = (taskId) => {
     const task = tasks[taskId];
-
     if(task){
         console.log(`Title: ${task.title} \nDescription: ${task.description} \nStatus: ${task.isCompleted ? "Completed" : "Not Completed"} \n\n`);
     }
@@ -80,7 +84,8 @@ const createTask = (title, description, isCompleted) => {
     return saveTasks()
 };
 
-const deleteTask = async () => {
+// Delete Task Interactive
+const deleteTaskInteractive = async () => {
     const deleteID = await input({
         message: "Enter the index to be deleted"
     });
@@ -90,10 +95,22 @@ const deleteTask = async () => {
         return saveTasks();
     }
     catch (err) {
-        console.error("Please specify the correct index ", err)
+        console.error("Please specify the correct index ", err);
     }
 };
 
+// Delete Task
+const deleteTask = (deleteID) => {
+    try{
+        tasks.splice(deleteID - 1, 1);
+        return saveTasks();
+    }
+    catch(err){
+        console.error("Please specify the correct index ", err);
+    }
+};
+
+// Save Tasks
 const saveTasks = () => {
     return new Promise((resolve, reject) => {
         fs.writeFile(path.join(path.resolve(), 'tasks.json'), JSON.stringify(tasks, null, 2), (err) => {
@@ -105,6 +122,7 @@ const saveTasks = () => {
     });
 };
 
+// Search Tasks
 const searchTasks = (searchArgument) => {
     return new Promise((resolve) => {
         const searchedTasks = tasks.filter((task) => {
@@ -123,8 +141,8 @@ const searchTasks = (searchArgument) => {
     });
 }
 
-
-const markCompleted = async () => {
+// Mark as Completed
+const markCompletedInteractive = async () => {
     const completedID = await input({
         message: "Enter the index for the task that is completed"
     });
@@ -139,7 +157,21 @@ const markCompleted = async () => {
     return saveTasks();
 };
 
+const markCompleted = (completedID) => {
+    const task = tasks[completedID - 1];
+    
+    if (task) {
+        task.isCompleted = true;
+        saveTasks();
+    }
+    else {
+        console.error("Task not found");
+    }
 
+    return saveTasks();
+}
+
+// Interactive Menu
 const interactiveMainMenu = () => {
     loadTasks().then(async() => {
         return select({
@@ -160,10 +192,10 @@ const interactiveMainMenu = () => {
                     return listTasks().then(() => interactiveMainMenu());
 
                 case "delete":
-                    return deleteTask().then(() => interactiveMainMenu());
+                    return deleteTaskInteractive().then(() => interactiveMainMenu());
 
                 case "mark":
-                    return markCompleted().then(() => interactiveMainMenu());
+                    return markCompletedInteractive().then(() => interactiveMainMenu());
 
                 case "exit":
                     return;
@@ -205,6 +237,12 @@ const main = () => {
             }
         }
 
+        // List all task
+        if (process.argv.indexOf("-l") !== -1 || process.argv.indexOf("--list") !== -1){
+            console.log("Listed")
+            listTasks();
+        }
+
         // Find using task index
         if(process.argv.indexOf("-f") !== -1 || process.argv.indexOf("--find") !== -1){
             const findParamIndex = process.argv.indexOf("-f") !== -1 ? process.argv.indexOf("-f") : process.argv.indexOf("--find");
@@ -213,11 +251,10 @@ const main = () => {
 
             if(findArgIndex != -1 && findArgument == undefined){
                 console.error("Specify the task index to be checked")
+                return;
             }
 
-            if (findArgument) {
-                findTask(findArgument - 1)
-            }
+            findTask(findArgument - 1);
         }
 
         // Search for a task
@@ -229,16 +266,40 @@ const main = () => {
             // Check for other params
             if(searchArgIndex != -1 && searchArgument == undefined){
                 console.error("Specify the keyword to be searched for");
+                return;
             }
 
-            if (searchArgument) {
-                searchTasks(searchArgument);
-            }
+            searchTasks(searchArgument);
         }
-    })
 
-   
+        // Delete a task
+        if (process.argv.indexOf("-d") !== -1 || process.argv.indexOf("--delete") !== -1){
+            const deleteParamIndex = process.argv.indexOf("-d") !== -1 ? process.argv.indexOf("-d") : process.argv.indexOf("--delete");
+            const deleteArgIndex = deleteParamIndex !== -1 ? deleteParamIndex + 1: -1;
+            const deleteArgument = process.argv[deleteArgIndex];
 
+            if(deleteArgIndex !== -1 && deleteArgument == undefined){
+                console.error("Specify the index of the task to be deleted");
+                return;
+            }
+
+            deleteTask();
+        }
+
+        // Mark task as completed
+        if (process.argv.indexOf("-m") !== -1 || process.argv.indexOf("--mark") !== -1){
+            const markParamIndex = process.argv.indexOf("-m") !== -1 ? process.argv.indexOf("-m") : process.argv.indexOf("--mark");
+            const markArgIndex = markParamIndex !== -1 ? markParamIndex + 1: -1;
+            const markArgument = process.argv[markArgIndex];
+
+            if (markArgIndex !== -1 && markArgument == undefined){
+                console.error("Specify the index of the task to be marked as completed");
+                return;
+            }
+
+            markCompleted(markArgument);
+        }
+    });
 }
 
 main()
